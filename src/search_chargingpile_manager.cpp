@@ -91,8 +91,8 @@ void SearchChargingPileManager::addLaserScanMsg(const sensor_msgs::LaserScanCons
         _searchFSM->update(packet, transform);
         std::cout << transform.getOrigin().x() << " " << transform.getOrigin().y() << std::endl;
 
-        _vel_msg.angular.z = 1.0 * atan2(transform.getOrigin().y(), transform.getOrigin().x());
-        _vel_msg.linear.x  = 0.5 * sqrt(pow(transform.getOrigin().x(), 2.0) + pow(transform.getOrigin().y(), 2.0));
+        _vel_msg.angular.z = 2.0 * atan2(transform.getOrigin().y(), transform.getOrigin().x());
+        _vel_msg.linear.x  = 0.25 * sqrt(pow(transform.getOrigin().x(), 2.0) + pow(transform.getOrigin().y(), 2.0));
 
     }
 
