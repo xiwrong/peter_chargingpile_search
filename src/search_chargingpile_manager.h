@@ -61,7 +61,7 @@ private:
 
     void filterSplitLaser(std::vector<double> angles, std::vector<double> ranges);
 
-    int  findSalientIndexByArray(double* x, double* y, int n , double eps);
+//    int  findSalientIndexByArray(double* x, double* y, int n , double eps);
 
     void changeRangetoXY(std::vector<double> angles, std::vector<double> ranges);
 

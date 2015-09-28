@@ -13,7 +13,7 @@ int main(int argc, char** argv)
 
 	tf::TransformListener listener;
 
-	//xiwrong-->todo ===== Is this rate suitable?
+
 	ros::Rate rate(10.0);
 	while (node.ok())
 	{

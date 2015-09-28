@@ -68,11 +68,10 @@ void SearchChargingPileManager::addLaserScanMsg(const sensor_msgs::LaserScanCons
         _sourcePoints.push_back(point);
     }
 
-
+    // ===============deal with points to find objective==================
     splitLaserWithRange();                                      //calculate _breakedLaser...
     filterSplitLaser(_breakedLaserAngle, _breakedLaserRange);   //calculate _filterLaser...
     changeRangetoXY(_filterLaserAngle, _filterLaserRange);
-
     PointWithTimeStamp keyPoint;
     bool flag = findKeyPointFromLines(keyPoint);
 
@@ -92,7 +91,7 @@ void SearchChargingPileManager::addLaserScanMsg(const sensor_msgs::LaserScanCons
         std::cout << transform.getOrigin().x() << " " << transform.getOrigin().y() << std::endl;
 
         _vel_msg.angular.z = 2.0 * atan2(transform.getOrigin().y(), transform.getOrigin().x());
-        _vel_msg.linear.x  = 0.25 * sqrt(pow(transform.getOrigin().x(), 2.0) + pow(transform.getOrigin().y(), 2.0));
+        _vel_msg.linear.x  = 0.1 * sqrt(pow(transform.getOrigin().x(), 2.0) + pow(transform.getOrigin().y(), 2.0));
 
     }
 
@@ -265,13 +264,6 @@ void SearchChargingPileManager::changeRangetoXY(std::vector<double> angles, std:
         onePoint.y = ranges.at(i)* sin(angles.at(i));
         oneLine.push_back(onePoint);
     }
-
-    //    int returnValue;
-    //    for (int i = 0; i < _splitLines.size(); i++)
-    //    {
-    //        returnValue = findSalientIndexByVector(_splitLines.at(i), Max_Salient_Tolerance);
-    //        //        std::cout << returnValue << "/" << _splitLines.at(i).size() << std::endl;
-    //    }
 }
 
 int  SearchChargingPileManager::findSalientIndexByVector(std::vector<XYPoint> line, double eps)
@@ -302,30 +294,30 @@ int  SearchChargingPileManager::findSalientIndexByVector(std::vector<XYPoint> li
     return 0;
 }
 
-int  SearchChargingPileManager::findSalientIndexByArray(double* x, double* y, int n, double eps)
-{
-    double dis = sqrt(pow((x[0]-x[n-1]), 2.0) + pow((y[0]-y[n-1]), 2.0));
-    double cosTheta =  (x[n-1] - x[0])/ dis;
-    double sinTheta = -(y[n-1] - y[0])/ dis;
-    double maxDis = 0;
-    int maxDisIndex = 0;
-    double dbDis;
+//int  SearchChargingPileManager::findSalientIndexByArray(double* x, double* y, int n, double eps)
+//{
+//    double dis = sqrt(pow((x[0]-x[n-1]), 2.0) + pow((y[0]-y[n-1]), 2.0));
+//    double cosTheta =  (x[n-1] - x[0])/ dis;
+//    double sinTheta = -(y[n-1] - y[0])/ dis;
+//    double maxDis = 0;
+//    int maxDisIndex = 0;
+//    double dbDis;
 
-    for(int i = 1 ; i < n-1 ; i++)
-    {
-        dbDis = fabs((y[i]-y[0])*cosTheta + (x[i]-x[0])*sinTheta);
-        if( dbDis > maxDis)
-        {
-            maxDis = dbDis;
-            maxDisIndex = i;
-        }
-    }
-    if(maxDis > eps)
-    {
-        return maxDisIndex;
-    }
-    return 0;
-}
+//    for(int i = 1 ; i < n-1 ; i++)
+//    {
+//        dbDis = fabs((y[i]-y[0])*cosTheta + (x[i]-x[0])*sinTheta);
+//        if( dbDis > maxDis)
+//        {
+//            maxDis = dbDis;
+//            maxDisIndex = i;
+//        }
+//    }
+//    if(maxDis > eps)
+//    {
+//        return maxDisIndex;
+//    }
+//    return 0;
+//}
 
 bool SearchChargingPileManager::findKeyPointFromLines(PointWithTimeStamp& keyPoint)
 {
@@ -374,27 +366,19 @@ bool SearchChargingPileManager::findKeyPointFromLines(PointWithTimeStamp& keyPoi
                 minVariance = tempVariance;
 
                 keyPoint.timestamp = ros::Time::now();
-                //xiwrong-->todo  should select the most suitable one from N keypoints, not select the first we find.
+
                 keyPoint.x = (tmpLinePara2.b - tmpLinePara1.b)/ (tmpLinePara1.a - tmpLinePara2.a);
                 keyPoint.y = tmpLinePara1.a* keyPoint.x + tmpLinePara1.b;
                 keyPoint.z = 0;
                 //               std::cout << " tmpLinePara1 = "  << tmpLinePara1.Rho*180/PAI <<
                 //                            " tmpLinePara2 = "  << tmpLinePara2.Rho*180/PAI << std::endl;
 
-                // xiwrong-->todo      problem: x=0
+
                 changedAngle1 = (tmpLinePara1.Rho > 0)? tmpLinePara1.Rho: PAI+tmpLinePara1.Rho;
                 changedAngle2 = (tmpLinePara2.Rho > 0)? tmpLinePara2.Rho: PAI+tmpLinePara2.Rho;
                 double average = (changedAngle1 + changedAngle2)/2 - PAI/2;
                 keyPoint.theta = average;
 
-
-
-                //                double average = (changedAngle1 + changedAngle2)/2;
-                //                double sign = (keyPoint.x*average > 0) ? -1.0: 1.0;
-                //                double signAngle = (tmpLinePara1.Rho + tmpLinePara2.Rho > 0) ? 1.0: -1.0;
-
-                //                keyPoint.theta = average* signAngle + sign*PAI/2;
-                //                std::cout << keyPoint.theta*180/PAI << std::endl;
                 findResultFlag = true;
             }
         }

@@ -53,13 +53,7 @@ ScanLandmarkState::ScanLandmarkState(SearchChargingPileFSM* fsm)
 
 void ScanLandmarkState::update(UpdateDataPacket& pack, tf::Transform& transform)
 {
-    //    ROS_INFO_STREAM("ScanLandmarkState- " << pack.objPosition.timestamp << "-->(x, y, z, theta) = " <<
-    //                    "(" <<
-    //                    pack.objPosition.x << " " <<
-    //                    pack.objPosition.y << " " <<
-    //                    pack.objPosition.z << " " <<
-    //                    pack.objPosition.theta << " " <<
-    //                    ")");
+
     if (ros::Time::now() - pack.objPosition.timestamp < ros::Duration(0.5))
     {
         _fsm->changeState(_fsm->_approachingState);
