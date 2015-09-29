@@ -44,7 +44,7 @@ void ScanLandmarkState::update(UpdateDataPacket& pack, tf::Transform& transform)
 
 // ==============================
 
-const double ApproachingState::XOffsetToObjective = 0.30;              //unit:m
+const double ApproachingState::XOffsetToObjective = 0.45;              //unit:m
 
 ApproachingState::ApproachingState(SearchChargingPileFSM* fsm)
 {

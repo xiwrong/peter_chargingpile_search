@@ -16,6 +16,7 @@ namespace peter_chargingpile_search {
 
 const int SearchChargingPileManager::Const_Queue_Length = 1500;             //sourceNum = 1080
 const double SearchChargingPileManager::Recognization_Angle = 160.0;        //unit:angle
+const double SearchChargingPileManager::LaserXOffsetToRobot = 0.2;          //unit:m
 
 
 //dynamic_reconfigure
@@ -40,7 +41,7 @@ SearchChargingPileManager::SearchChargingPileManager(ros::NodeHandle nh) : _nh(n
     _chargeOrderFlag = true;
     _powerStatusFlag = false;
 
-    _isExistValidObj = false;
+//    _isExistValidObj = false;
     _searchFSM = boost::make_shared<SearchChargingPileFSM>();
 
     _pointsPub = _nh.advertise<sensor_msgs::PointCloud>("debug/cloud", 50);
@@ -85,6 +86,8 @@ void SearchChargingPileManager::addLaserScanMsg(const sensor_msgs::LaserScanCons
     {
         UpdateDataPacket packet;
         packet.objPosition = keyPoint;
+        packet.objPosition.x += LaserXOffsetToRobot;    //change laser coordinate to robot coordinate
+
         packet.chargeOrderFlag = _chargeOrderFlag;
         packet.powerStatusFlag = _powerStatusFlag;
 
@@ -93,11 +96,11 @@ void SearchChargingPileManager::addLaserScanMsg(const sensor_msgs::LaserScanCons
         //        std::cout << transform.getOrigin().x() << " " << transform.getOrigin().y() << std::endl;
 
         _vel_msg.linear.x  = 0.1 * sqrt(pow(transform.getOrigin().x(), 2.0) + pow(transform.getOrigin().y(), 2.0));
-        _vel_msg.angular.z = (transform.getOrigin().x() > 0.01)?
+        _vel_msg.angular.z = (transform.getOrigin().x() > 0.005)?
                     atan2(transform.getOrigin().y(), transform.getOrigin().x()) :
                     transform.getRotation().getAngle();
-        boost::mutex::scoped_lock lock(_ctrlCmdVelMutex);
-        _isExistValidObj = true;
+//        boost::mutex::scoped_lock lock(_ctrlCmdVelMutex);
+//        _isExistValidObj = true;
 
     }
 
@@ -105,17 +108,18 @@ void SearchChargingPileManager::addLaserScanMsg(const sensor_msgs::LaserScanCons
 
 void SearchChargingPileManager::onTimerCtrlCmdVel(const ros::TimerEvent& t)
 {
-    boost::mutex::scoped_lock lock(_ctrlCmdVelMutex);
-    if(_isExistValidObj)
-    {
-        _ctrlCmdVelPub.publish(_vel_msg);
-         _isExistValidObj = false;
-    }
-    else
-    {
-         geometry_msgs::Twist null_msg;
-        _ctrlCmdVelPub.publish(null_msg);
-    }
+    _ctrlCmdVelPub.publish(_vel_msg);
+//    boost::mutex::scoped_lock lock(_ctrlCmdVelMutex);
+//    if(_isExistValidObj)
+//    {
+//        _ctrlCmdVelPub.publish(_vel_msg);
+//         _isExistValidObj = false;
+//    }
+//    else
+//    {
+//         geometry_msgs::Twist null_msg;
+//        _ctrlCmdVelPub.publish(null_msg);
+//    }
 
 
 }

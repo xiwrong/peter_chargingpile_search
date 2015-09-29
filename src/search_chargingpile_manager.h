@@ -44,6 +44,7 @@ private:
 
     static const int Const_Queue_Length;
     static const double Recognization_Angle;
+    static const double LaserXOffsetToRobot;
 
     static const double Break_Distance;
     static const int Ignore_Point_Num;
@@ -79,8 +80,8 @@ private:
     ros::Timer     _ctrlCmdVelTimer;
     void onTimerCtrlCmdVel(const ros::TimerEvent& t);
     geometry_msgs::Twist _vel_msg;
-    boost::mutex _ctrlCmdVelMutex;
-    bool         _isExistValidObj;
+//    boost::mutex _ctrlCmdVelMutex;
+//    bool         _isExistValidObj;
 
 private:
     bool _chargeOrderFlag;
