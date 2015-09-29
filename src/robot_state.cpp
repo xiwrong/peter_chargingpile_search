@@ -13,16 +13,6 @@ InitialState::InitialState(SearchChargingPileFSM* fsm)
     _fsm = fsm;
 }
 
-//void InitialState::begin()
-//{
-////    ROS_INFO("SearchChargingPileFSM--[State Initial Begin]");
-
-//}
-
-//void InitialState::end()
-//{
-
-//}
 
 void InitialState::update(UpdateDataPacket& pack, tf::Transform& transform)
 {
@@ -42,14 +32,6 @@ ScanLandmarkState::ScanLandmarkState(SearchChargingPileFSM* fsm)
     _fsm = fsm;
 }
 
-//void ScanLandmarkState::begin()
-//{
-////    ROS_INFO("SearchChargingPileFSM--[State ScanLandmark Begin]");
-//}
-//void ScanLandmarkState::end()
-//{
-////    std::cout << "call ScanLandmarkState::end()" << std::endl;
-//}
 
 void ScanLandmarkState::update(UpdateDataPacket& pack, tf::Transform& transform)
 {
