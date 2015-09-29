@@ -105,10 +105,10 @@ void SearchChargingPileManager::addLaserScanMsg(const sensor_msgs::LaserScanCons
 
 void SearchChargingPileManager::onTimerCtrlCmdVel(const ros::TimerEvent& t)
 {
+    boost::mutex::scoped_lock lock(_ctrlCmdVelMutex);
     if(_isExistValidObj)
     {
         _ctrlCmdVelPub.publish(_vel_msg);
-         boost::mutex::scoped_lock lock(_ctrlCmdVelMutex);
          _isExistValidObj = false;
     }
     else
