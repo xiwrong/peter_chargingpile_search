@@ -44,7 +44,7 @@ void ScanLandmarkState::update(UpdateDataPacket& pack, tf::Transform& transform)
 
 // ==============================
 
-const double ApproachingState::XOffsetToObjective = 0.45;              //unit:m
+const double ApproachingState::XOffsetToObjective = 0.5;              //unit:m
 
 ApproachingState::ApproachingState(SearchChargingPileFSM* fsm)
 {
@@ -78,7 +78,7 @@ void ApproachingState::update(UpdateDataPacket& pack, tf::Transform& transform)
 
     ROS_INFO_STREAM("ApproachingState- deltaX Y Theta = " << deltaX << " " << deltaY << " " <<deltaTheta);
 
-    if (deltaX < 0.005 && deltaY < 0.005 && deltaTheta < 0.01)
+    if (deltaX < 0.02 && deltaY < 0.005 && deltaTheta < 0.1)
     {
         _fsm->changeState(_fsm->_secondApproachingState);
     }

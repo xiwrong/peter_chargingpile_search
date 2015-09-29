@@ -98,7 +98,7 @@ void SearchChargingPileManager::addLaserScanMsg(const sensor_msgs::LaserScanCons
         _vel_msg.linear.x  = 0.1 * sqrt(pow(transform.getOrigin().x(), 2.0) + pow(transform.getOrigin().y(), 2.0));
         _vel_msg.angular.z = (transform.getOrigin().x() > 0.005)?
                     atan2(transform.getOrigin().y(), transform.getOrigin().x()) :
-                    transform.getRotation().getAngle();
+                    0.5* transform.getRotation().getAngle();
 //        boost::mutex::scoped_lock lock(_ctrlCmdVelMutex);
 //        _isExistValidObj = true;
 
