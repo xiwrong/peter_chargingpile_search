@@ -30,8 +30,8 @@ class InitialState : public RobotState
 public:
 
     InitialState(SearchChargingPileFSM* fsm);
-//    void begin();
-//    void end();
+    //    void begin();
+    //    void end();
     void update(UpdateDataPacket& pack, tf::Transform& transform);
 
 };
@@ -42,8 +42,8 @@ class ScanLandmarkState : public RobotState
 public:
     ScanLandmarkState(SearchChargingPileFSM* fsm);
 
-//    void begin();
-//    void end();
+    //    void begin();
+    //    void end();
     void update(UpdateDataPacket& pack, tf::Transform& transform);
 };
 
@@ -55,9 +55,20 @@ public:
     void update(UpdateDataPacket& pack, tf::Transform& transform);
 
 private:
-    PointWithTimeStamp _oldPoint;
-    bool _isFoundObjectivePoint;
-    double distanceBetweenTwoPoints(PointWithTimeStamp a, PointWithTimeStamp b);
+    static const double XOffsetToObjective;
+//    PointWithTimeStamp _oldPoint;
+//    bool _isFoundObjectivePoint;
+//    double distanceBetweenTwoPoints(PointWithTimeStamp a, PointWithTimeStamp b);
+};
+
+// ===================
+
+class SecondApproachingState : public RobotState
+{
+public:
+    SecondApproachingState(SearchChargingPileFSM* fsm);
+    void update(UpdateDataPacket& pack, tf::Transform& transform);
+
 };
 
 // ==================

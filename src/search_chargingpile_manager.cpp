@@ -76,7 +76,7 @@ void SearchChargingPileManager::addLaserScanMsg(const sensor_msgs::LaserScanCons
     bool flag = findKeyPointFromLines(keyPoint);
 
     // ===============show pointcloud============
-    publishPointCloud(_filterLaserAngle, _filterLaserRange, keyPoint, flag);
+    publishPointCloud(_breakedLaserAngle, _breakedLaserRange, keyPoint, flag);
 
     // ===============send packet================
     if (flag)
@@ -90,8 +90,11 @@ void SearchChargingPileManager::addLaserScanMsg(const sensor_msgs::LaserScanCons
         _searchFSM->update(packet, transform);
         std::cout << transform.getOrigin().x() << " " << transform.getOrigin().y() << std::endl;
 
-        _vel_msg.angular.z = 2.0 * atan2(transform.getOrigin().y(), transform.getOrigin().x());
+
+
         _vel_msg.linear.x  = 0.1 * sqrt(pow(transform.getOrigin().x(), 2.0) + pow(transform.getOrigin().y(), 2.0));
+        _vel_msg.angular.z = (transform.getOrigin().x() > 0.01)?
+                    (2.0 * atan2(transform.getOrigin().y(), transform.getOrigin().x())) : transform.getRotation().getAngle();
 
     }
 

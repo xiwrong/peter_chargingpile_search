@@ -9,6 +9,7 @@ SearchChargingPileFSM::SearchChargingPileFSM()
     _initialState      = boost::make_shared<InitialState>(this);
     _scanLandmarkState = boost::make_shared<ScanLandmarkState>(this);
     _approachingState  = boost::make_shared<ApproachingState>(this);
+    _secondApproachingState = boost::make_shared<SecondApproachingState>(this);
     _finishState       = boost::make_shared<FinishState>(this);
 
     _currentState = _initialState;
@@ -28,14 +29,8 @@ void SearchChargingPileFSM::update(UpdateDataPacket& pack, tf::Transform& transf
 {
     if (_currentState != NULL)
     {
-
         _currentState->update(pack, transform);
-//        std::cout << transform.getOrigin().getX() << " " <<
-//                     transform.getOrigin().getY() << " " <<
-//                     transform.getOrigin().getZ() << " " <<
-//                     transform.getRotation().getAngle() << std::endl;
 
-//        _expectedPoseTFbr.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "robot", "charging_pile"));
     }
 
 }

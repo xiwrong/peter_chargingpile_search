@@ -23,6 +23,7 @@ public:
     boost::shared_ptr<RobotState> _initialState;
     boost::shared_ptr<RobotState> _scanLandmarkState;
     boost::shared_ptr<RobotState> _approachingState;
+    boost::shared_ptr<RobotState> _secondApproachingState;
     boost::shared_ptr<RobotState> _finishState;
 
     SearchChargingPileFSM();
