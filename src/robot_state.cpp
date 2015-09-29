@@ -54,7 +54,7 @@ ApproachingState::ApproachingState(SearchChargingPileFSM* fsm)
 
 void ApproachingState::update(UpdateDataPacket& pack, tf::Transform& transform)
 {
-    ROS_INFO("ApproachingState- update");
+
 //        ROS_INFO_STREAM("ApproachingState- " << pack.objPosition.timestamp << "-->(x, y, z, theta) = " <<
 //                        "(" <<
 //                        pack.objPosition.x << " " <<
@@ -75,6 +75,8 @@ void ApproachingState::update(UpdateDataPacket& pack, tf::Transform& transform)
     double deltaX = pack.objPosition.x - XOffsetToObjective* cos(pack.objPosition.theta);
     double deltaY = pack.objPosition.y - XOffsetToObjective* sin(pack.objPosition.theta);
     double deltaTheta = pack.objPosition.theta;
+
+    ROS_INFO_STREAM("ApproachingState- deltaX Y Theta = " << deltaX << " " << deltaY << " " <<deltaTheta);
 
     if (deltaX < 0.005 && deltaY < 0.005 && deltaTheta < 0.01)
     {

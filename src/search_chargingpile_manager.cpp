@@ -88,7 +88,7 @@ void SearchChargingPileManager::addLaserScanMsg(const sensor_msgs::LaserScanCons
 
         tf::Transform transform;
         _searchFSM->update(packet, transform);
-        std::cout << transform.getOrigin().x() << " " << transform.getOrigin().y() << std::endl;
+//        std::cout << transform.getOrigin().x() << " " << transform.getOrigin().y() << std::endl;
 
 
 
