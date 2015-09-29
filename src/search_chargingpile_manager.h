@@ -79,6 +79,8 @@ private:
     ros::Timer     _ctrlCmdVelTimer;
     void onTimerCtrlCmdVel(const ros::TimerEvent& t);
     geometry_msgs::Twist _vel_msg;
+    boost::mutex _ctrlCmdVelMutex;
+    bool         _isExistValidObj;
 
 private:
     bool _chargeOrderFlag;
