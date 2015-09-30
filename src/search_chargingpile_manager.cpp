@@ -75,11 +75,20 @@ void SearchChargingPileManager::addLaserScanMsg(const sensor_msgs::LaserScanCons
     splitLaserWithRange();                                      //calculate _breakedLaser...
     filterSplitLaser(_breakedLaserAngle, _breakedLaserRange);   //calculate _filterLaser...
     changeRangetoXY(_filterLaserAngle, _filterLaserRange);
+
+    // ====== method 1 ======
     PointWithTimeStamp keyPoint;
     bool flag = findKeyPointFromLines(keyPoint);
 
+    // ====== method 2 ======
+//    bool flag = xiFindKeyPointFromLines(keyPoint);
+
     // ===============show pointcloud============
     publishPointCloud(_breakedLaserAngle, _breakedLaserRange, keyPoint, flag);
+
+//    std::vector<double> va;
+//    std::vector<double> vb;
+//    publishPointCloud(va, vb, xikeyPoint, xiflag);
 
     // ===============send packet================
     if (flag)
@@ -109,18 +118,6 @@ void SearchChargingPileManager::addLaserScanMsg(const sensor_msgs::LaserScanCons
 void SearchChargingPileManager::onTimerCtrlCmdVel(const ros::TimerEvent& t)
 {
     _ctrlCmdVelPub.publish(_vel_msg);
-    //    boost::mutex::scoped_lock lock(_ctrlCmdVelMutex);
-    //    if(_isExistValidObj)
-    //    {
-    //        _ctrlCmdVelPub.publish(_vel_msg);
-    //         _isExistValidObj = false;
-    //    }
-    //    else
-    //    {
-    //         geometry_msgs::Twist null_msg;
-    //        _ctrlCmdVelPub.publish(null_msg);
-    //    }
-
 
 }
 
@@ -288,14 +285,31 @@ void SearchChargingPileManager::changeRangetoXY(std::vector<double> angles, std:
 }
 
 
-int  SearchChargingPileManager::recurFindSalientIndexByVector(std::vector<XYPoint> line,
-                                                              double recogAngle,
-                                                              double eps,
-                                                              std::vector<weighted_fit::LinePara> lineParas)
+void SearchChargingPileManager::recurSplitPointsVector(std::vector<XYPoint> line, double eps,
+                                                       std::vector<weighted_fit::LinePara>& lineParas)
 {
     int n = line.size();
     if (n < _param_ignore_point_num)
-        return -1;  // exit recursion
+        return;  // exit recursion
+
+    weighted_fit::LinePara tempLinePara;
+    double tempx[Const_Queue_Length];
+    double tempy[Const_Queue_Length];
+
+    for (int j = 0; j < line.size(); j++)
+    {
+        tempx[j] = line.at(j).x;
+        tempy[j] = line.at(j).y;
+    }
+
+    weighted_fit::weightedFit(tempx, tempy, line.size(), &tempLinePara);
+
+    if (tempLinePara.standardDeviation < Max_Variance_Tolerance)
+    {
+        lineParas.push_back(tempLinePara);
+    }
+
+
     double dis = sqrt(pow(line.at(0).x - line.at(n-1).x, 2.0) + pow(line.at(0).y - line.at(n-1).y, 2.0));
     double cosTheta =  (line.at(n-1).x - line.at(0).x)/ dis;
     double sinTheta = -(line.at(n-1).y - line.at(0).y)/ dis;
@@ -313,33 +327,73 @@ int  SearchChargingPileManager::recurFindSalientIndexByVector(std::vector<XYPoin
         }
     }
 
-
     if(maxDis > eps)
     {
         //xiwrong-->todo
         std::vector<XYPoint> splitLine1(line.begin(), line.begin() + maxDisIndex);
-        std::vector<XYPoint> splitLine2(line.begin() + maxDisIndex + 1, line.end());
-        recurFindSalientIndexByVector(splitLine1, recogAngle, eps, lineParas);
-        recurFindSalientIndexByVector(splitLine2, recogAngle, eps, lineParas);
+        std::vector<XYPoint> splitLine2(line.begin() + maxDisIndex, line.end());
+        recurSplitPointsVector(splitLine1, eps, lineParas);
+        recurSplitPointsVector(splitLine2, eps, lineParas);
     }
-    else
+}
+
+
+bool SearchChargingPileManager::xiFindKeyPointFromLines(PointWithTimeStamp& keyPoint)
+{
+    bool findResultFlag = false;
+
+
+    double tempVariance = 0.0;
+    double minVariance = 100.0;
+    weighted_fit::LinePara tmpLinePara1;
+    weighted_fit::LinePara tmpLinePara2;
+    double changedAngle1 = 0.0;
+    double changedAngle2 = 0.0;
+    std::vector<weighted_fit::LinePara> tempLineParas;
+
+    for (int i = 0; i < _splitLines.size(); i++)
     {
-        weighted_fit::LinePara tempLinePara;
-        double tempx[Const_Queue_Length];
-        double tempy[Const_Queue_Length];
+        std::vector<XYPoint> tempLine = _splitLines.at(i);
 
-        for (int j = 0; j < line.size(); j++)
+        recurSplitPointsVector(tempLine, _param_max_salient_tolerance, tempLineParas);
+
+        for (int j = 0; j < tempLineParas.size()-1; j++)
         {
-            tempx[j] = line.at(j).x;
-            tempy[j] = line.at(j).y;
+            for (int k = j+1; k < tempLineParas.size(); k++)
+            {
+                tmpLinePara1 = tempLineParas[j];
+                tmpLinePara2 = tempLineParas[k];
+                double theta = (tmpLinePara1.Rho - tmpLinePara2.Rho)*180/PAI;
+                double variance1 = tmpLinePara1.standardDeviation;
+                double variance2 = tmpLinePara2.standardDeviation;
+                if ((fabs( theta - 180 + Recognization_Angle) < _param_max_festureangle_tolerance ||
+                     fabs( theta + Recognization_Angle ) < _param_max_festureangle_tolerance) &&
+                        variance1 < _param_max_variance_tolerance && variance2 < _param_max_variance_tolerance) //filter [angle=160]
+                {
+                    tempVariance = std::max(variance1, variance2);
+                    if (tempVariance < minVariance)
+                    {
+                        minVariance = tempVariance;
+                        keyPoint.timestamp = ros::Time::now();
+
+                        keyPoint.x = (tmpLinePara2.b - tmpLinePara1.b)/ (tmpLinePara1.a - tmpLinePara2.a);
+                        keyPoint.y = tmpLinePara1.a* keyPoint.x + tmpLinePara1.b;
+                        keyPoint.z = 0;
+
+                        changedAngle1 = (tmpLinePara1.Rho > 0)? tmpLinePara1.Rho: PAI+tmpLinePara1.Rho;
+                        changedAngle2 = (tmpLinePara2.Rho > 0)? tmpLinePara2.Rho: PAI+tmpLinePara2.Rho;
+                        double average = (changedAngle1 + changedAngle2)/2 - PAI/2;
+                        keyPoint.theta = average;
+
+                        findResultFlag = true;
+                    }
+                }
+            }
         }
-
-        weighted_fit::weightedFit(tempx, tempy, line.size(), &tempLinePara);
-
-        lineParas.push_back(tempLinePara);
     }
 
-    return 0;
+    return findResultFlag;
+
 }
 
 
@@ -352,7 +406,7 @@ int  SearchChargingPileManager::findSalientIndexByVector(std::vector<XYPoint> li
     double cosTheta =  (line.at(n-1).x - line.at(0).x)/ dis;
     double sinTheta = -(line.at(n-1).y - line.at(0).y)/ dis;
     double maxDis = 0;
-    int maxDisIndex = 0;
+    int    maxDisIndex = 0;
     double dbDis;
 
     for(int i = 1 ; i < n-1 ; i++)

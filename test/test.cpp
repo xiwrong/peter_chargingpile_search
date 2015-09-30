@@ -19,6 +19,37 @@ using namespace std;
 using namespace boost;
 using namespace weighted_fit;
 
+template<typename T> void printVec(std::vector<T>& vecs)
+{
+    for (int i = 0; i < vecs.size(); i++)
+    {
+        std::cout << vecs[i];
+    }
+    std::cout << std::endl;
+}
+
+void testVector()
+{
+    std::vector<int> vec;
+    vec.push_back(1);
+    vec.push_back(2);
+    vec.push_back(3);
+    vec.push_back(4);
+    vec.push_back(5);
+    vec.push_back(6);
+
+    int maxDisIndex = 2;
+
+    std::vector<int> splitLine1(vec.begin(), vec.begin() + maxDisIndex);
+    std::vector<int> splitLine2(vec.begin() + maxDisIndex, vec.end());
+
+    printVec<int>(splitLine1);
+    printVec<int>(splitLine2);
+    //    std::cout << splitLine1 << std::endl;
+}
+
+
+
 void testMath()
 {
     double value[9] = {1, 2, 3, 4, 8, 1, 2, 9, 4};
@@ -32,13 +63,13 @@ void testMath()
     weightedFit(x, y, 9, &lPara);
     double variance = lPara.standardDeviation;
     cout << "Variance = " << variance << endl;
-   // fitPara(x, y, 3, &lPara, w);
+    // fitPara(x, y, 3, &lPara, w);
     cout << lPara.a << "X" << "+" << lPara.b << endl;
 
-//    double xx[4] = {1, 2, 3, 0};
-//    double yy[4] = {3, 3, 4, 0};
-//    weightedFit(xx, yy, 4, &lPara);
-//    cout << lPara.a << "X" << "+" << lPara.b << endl;
+    //    double xx[4] = {1, 2, 3, 0};
+    //    double yy[4] = {3, 3, 4, 0};
+    //    weightedFit(xx, yy, 4, &lPara);
+    //    cout << lPara.a << "X" << "+" << lPara.b << endl;
 }
 
 void test1()
@@ -76,16 +107,17 @@ void test2()
 
 void test3()
 {
-        boost::shared_ptr<ObjectA> a(new ObjectA);
-        boost::shared_ptr<ObjectB> b(new ObjectB);
+    boost::shared_ptr<ObjectA> a(new ObjectA);
+    boost::shared_ptr<ObjectB> b(new ObjectB);
 
-        a->setObjectB(b);
-        b->setObjectA(a);
+    a->setObjectB(b);
+    b->setObjectA(a);
 }
 
 int main()
 {
-//    test1();
-// test2();
-    testMath();
+    //    test1();
+    // test2();
+    //    testMath();
+    testVector();
 }

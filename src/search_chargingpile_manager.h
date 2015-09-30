@@ -49,7 +49,7 @@ private:
     static const double LaserXOffsetToRobot;
 
     static const double Break_Distance;
-    static const int Ignore_Point_Num;
+    static const int    Ignore_Point_Num;
     static const double Max_Salient_Tolerance;
     static const double Max_Variance_Tolerance;
     static const double Max_FestureAngle_Tolerance;
@@ -57,23 +57,20 @@ private:
 
 private:
 
-
-
     //mathematics
     int  splitLaserWithRange();
 
     void filterSplitLaser(std::vector<double> angles, std::vector<double> ranges);
 
-//    int  findSalientIndexByArray(double* x, double* y, int n , double eps);
-
     void changeRangetoXY(std::vector<double> angles, std::vector<double> ranges);
 
     int  findSalientIndexByVector(std::vector<XYPoint> line, double eps);
 
-    int  recurFindSalientIndexByVector(std::vector<XYPoint> line, double recogAngle, double eps,
-                                       std::vector<weighted_fit::LinePara> lineParas);
-
     bool findKeyPointFromLines(PointWithTimeStamp& keyPoint);
+
+    // ================method 2================
+    void recurSplitPointsVector(std::vector<XYPoint> line, double eps, std::vector<weighted_fit::LinePara>& lineParas);
+    bool xiFindKeyPointFromLines(PointWithTimeStamp& keyPoint);
 
 private:
     ros::NodeHandle _nh;
