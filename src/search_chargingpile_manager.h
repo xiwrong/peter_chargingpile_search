@@ -64,13 +64,13 @@ private:
 
     void changeRangetoXY(std::vector<double> angles, std::vector<double> ranges);
 
+    // ================method 1================
     int  findSalientIndexByVector(std::vector<XYPoint> line, double eps);
-
     bool findKeyPointFromLines(PointWithTimeStamp& keyPoint);
 
     // ================method 2================
     void recurSplitPointsVector(std::vector<XYPoint> line, double eps, std::vector<weighted_fit::LinePara>& lineParas);
-    bool xiFindKeyPointFromLines(PointWithTimeStamp& keyPoint);
+    bool recurFindKeyPointFromLines(PointWithTimeStamp& keyPoint);
 
 private:
     ros::NodeHandle _nh;

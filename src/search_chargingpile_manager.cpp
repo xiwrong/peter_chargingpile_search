@@ -75,20 +75,17 @@ void SearchChargingPileManager::addLaserScanMsg(const sensor_msgs::LaserScanCons
     splitLaserWithRange();                                      //calculate _breakedLaser...
     filterSplitLaser(_breakedLaserAngle, _breakedLaserRange);   //calculate _filterLaser...
     changeRangetoXY(_filterLaserAngle, _filterLaserRange);
+    PointWithTimeStamp keyPoint;
 
     // ====== method 1 ======
-    PointWithTimeStamp keyPoint;
-    bool flag = findKeyPointFromLines(keyPoint);
-
+//    bool flag = findKeyPointFromLines(keyPoint);
     // ====== method 2 ======
-//    bool flag = xiFindKeyPointFromLines(keyPoint);
+    bool flag = recurFindKeyPointFromLines(keyPoint);
+
 
     // ===============show pointcloud============
-    publishPointCloud(_breakedLaserAngle, _breakedLaserRange, keyPoint, flag);
+    publishPointCloud(_filterLaserAngle, _filterLaserRange, keyPoint, flag);
 
-//    std::vector<double> va;
-//    std::vector<double> vb;
-//    publishPointCloud(va, vb, xikeyPoint, xiflag);
 
     // ===============send packet================
     if (flag)
@@ -292,22 +289,6 @@ void SearchChargingPileManager::recurSplitPointsVector(std::vector<XYPoint> line
     if (n < _param_ignore_point_num)
         return;  // exit recursion
 
-    weighted_fit::LinePara tempLinePara;
-    double tempx[Const_Queue_Length];
-    double tempy[Const_Queue_Length];
-
-    for (int j = 0; j < line.size(); j++)
-    {
-        tempx[j] = line.at(j).x;
-        tempy[j] = line.at(j).y;
-    }
-
-    weighted_fit::weightedFit(tempx, tempy, line.size(), &tempLinePara);
-
-    if (tempLinePara.standardDeviation < Max_Variance_Tolerance)
-    {
-        lineParas.push_back(tempLinePara);
-    }
 
 
     double dis = sqrt(pow(line.at(0).x - line.at(n-1).x, 2.0) + pow(line.at(0).y - line.at(n-1).y, 2.0));
@@ -335,10 +316,29 @@ void SearchChargingPileManager::recurSplitPointsVector(std::vector<XYPoint> line
         recurSplitPointsVector(splitLine1, eps, lineParas);
         recurSplitPointsVector(splitLine2, eps, lineParas);
     }
+    else
+    {
+        weighted_fit::LinePara tempLinePara;
+        double tempx[Const_Queue_Length];
+        double tempy[Const_Queue_Length];
+
+        for (int j = 0; j < line.size(); j++)
+        {
+            tempx[j] = line.at(j).x;
+            tempy[j] = line.at(j).y;
+        }
+
+        weighted_fit::weightedFit(tempx, tempy, line.size(), &tempLinePara);
+
+        if (tempLinePara.standardDeviation < Max_Variance_Tolerance)
+        {
+            lineParas.push_back(tempLinePara);
+        }
+    }
 }
 
 
-bool SearchChargingPileManager::xiFindKeyPointFromLines(PointWithTimeStamp& keyPoint)
+bool SearchChargingPileManager::recurFindKeyPointFromLines(PointWithTimeStamp& keyPoint)
 {
     bool findResultFlag = false;
 
@@ -349,14 +349,15 @@ bool SearchChargingPileManager::xiFindKeyPointFromLines(PointWithTimeStamp& keyP
     weighted_fit::LinePara tmpLinePara2;
     double changedAngle1 = 0.0;
     double changedAngle2 = 0.0;
-    std::vector<weighted_fit::LinePara> tempLineParas;
 
     for (int i = 0; i < _splitLines.size(); i++)
     {
+        std::vector<weighted_fit::LinePara> tempLineParas;
         std::vector<XYPoint> tempLine = _splitLines.at(i);
-
         recurSplitPointsVector(tempLine, _param_max_salient_tolerance, tempLineParas);
 
+        if (tempLineParas.size() < 2)
+            continue;
         for (int j = 0; j < tempLineParas.size()-1; j++)
         {
             for (int k = j+1; k < tempLineParas.size(); k++)
