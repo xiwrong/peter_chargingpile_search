@@ -29,7 +29,8 @@ void testMath()
     double y[9] = {0, 0.5, 1, 0.5, 0, -0.5, -1, -0.5, 0};
 
     LinePara lPara;
-    double variance = weightedFit(x, y, 9, &lPara);
+    weightedFit(x, y, 9, &lPara);
+    double variance = lPara.standardDeviation;
     cout << "Variance = " << variance << endl;
    // fitPara(x, y, 3, &lPara, w);
     cout << lPara.a << "X" << "+" << lPara.b << endl;

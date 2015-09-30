@@ -41,7 +41,7 @@ SearchChargingPileManager::SearchChargingPileManager(ros::NodeHandle nh) : _nh(n
     _chargeOrderFlag = true;
     _powerStatusFlag = false;
 
-//    _isExistValidObj = false;
+    //    _isExistValidObj = false;
     _searchFSM = boost::make_shared<SearchChargingPileFSM>();
 
     _pointsPub = _nh.advertise<sensor_msgs::PointCloud>("debug/cloud", 50);
@@ -99,8 +99,8 @@ void SearchChargingPileManager::addLaserScanMsg(const sensor_msgs::LaserScanCons
         _vel_msg.angular.z = (transform.getOrigin().x() > 0.005)?
                     atan2(transform.getOrigin().y(), transform.getOrigin().x()) :
                     0.5* transform.getRotation().getAngle();
-//        boost::mutex::scoped_lock lock(_ctrlCmdVelMutex);
-//        _isExistValidObj = true;
+        //        boost::mutex::scoped_lock lock(_ctrlCmdVelMutex);
+        //        _isExistValidObj = true;
 
     }
 
@@ -109,17 +109,17 @@ void SearchChargingPileManager::addLaserScanMsg(const sensor_msgs::LaserScanCons
 void SearchChargingPileManager::onTimerCtrlCmdVel(const ros::TimerEvent& t)
 {
     _ctrlCmdVelPub.publish(_vel_msg);
-//    boost::mutex::scoped_lock lock(_ctrlCmdVelMutex);
-//    if(_isExistValidObj)
-//    {
-//        _ctrlCmdVelPub.publish(_vel_msg);
-//         _isExistValidObj = false;
-//    }
-//    else
-//    {
-//         geometry_msgs::Twist null_msg;
-//        _ctrlCmdVelPub.publish(null_msg);
-//    }
+    //    boost::mutex::scoped_lock lock(_ctrlCmdVelMutex);
+    //    if(_isExistValidObj)
+    //    {
+    //        _ctrlCmdVelPub.publish(_vel_msg);
+    //         _isExistValidObj = false;
+    //    }
+    //    else
+    //    {
+    //         geometry_msgs::Twist null_msg;
+    //        _ctrlCmdVelPub.publish(null_msg);
+    //    }
 
 
 }
@@ -287,6 +287,62 @@ void SearchChargingPileManager::changeRangetoXY(std::vector<double> angles, std:
     }
 }
 
+
+int  SearchChargingPileManager::recurFindSalientIndexByVector(std::vector<XYPoint> line,
+                                                              double recogAngle,
+                                                              double eps,
+                                                              std::vector<weighted_fit::LinePara> lineParas)
+{
+    int n = line.size();
+    if (n < _param_ignore_point_num)
+        return -1;  // exit recursion
+    double dis = sqrt(pow(line.at(0).x - line.at(n-1).x, 2.0) + pow(line.at(0).y - line.at(n-1).y, 2.0));
+    double cosTheta =  (line.at(n-1).x - line.at(0).x)/ dis;
+    double sinTheta = -(line.at(n-1).y - line.at(0).y)/ dis;
+    double maxDis = 0;
+    int maxDisIndex = 0;
+    double dbDis;
+
+    for(int i = 1 ; i < n-1 ; i++)
+    {
+        dbDis = fabs((line.at(i).y - line.at(0).y)*cosTheta + (line.at(i).x - line.at(0).x)*sinTheta);
+        if( dbDis > maxDis)
+        {
+            maxDis = dbDis;
+            maxDisIndex = i;
+        }
+    }
+
+
+    if(maxDis > eps)
+    {
+        //xiwrong-->todo
+        std::vector<XYPoint> splitLine1(line.begin(), line.begin() + maxDisIndex);
+        std::vector<XYPoint> splitLine2(line.begin() + maxDisIndex + 1, line.end());
+        recurFindSalientIndexByVector(splitLine1, recogAngle, eps, lineParas);
+        recurFindSalientIndexByVector(splitLine2, recogAngle, eps, lineParas);
+    }
+    else
+    {
+        weighted_fit::LinePara tempLinePara;
+        double tempx[Const_Queue_Length];
+        double tempy[Const_Queue_Length];
+
+        for (int j = 0; j < line.size(); j++)
+        {
+            tempx[j] = line.at(j).x;
+            tempy[j] = line.at(j).y;
+        }
+
+        weighted_fit::weightedFit(tempx, tempy, line.size(), &tempLinePara);
+
+        lineParas.push_back(tempLinePara);
+    }
+
+    return 0;
+}
+
+
 int  SearchChargingPileManager::findSalientIndexByVector(std::vector<XYPoint> line, double eps)
 {
     int n = line.size();
@@ -315,30 +371,6 @@ int  SearchChargingPileManager::findSalientIndexByVector(std::vector<XYPoint> li
     return 0;
 }
 
-//int  SearchChargingPileManager::findSalientIndexByArray(double* x, double* y, int n, double eps)
-//{
-//    double dis = sqrt(pow((x[0]-x[n-1]), 2.0) + pow((y[0]-y[n-1]), 2.0));
-//    double cosTheta =  (x[n-1] - x[0])/ dis;
-//    double sinTheta = -(y[n-1] - y[0])/ dis;
-//    double maxDis = 0;
-//    int maxDisIndex = 0;
-//    double dbDis;
-
-//    for(int i = 1 ; i < n-1 ; i++)
-//    {
-//        dbDis = fabs((y[i]-y[0])*cosTheta + (x[i]-x[0])*sinTheta);
-//        if( dbDis > maxDis)
-//        {
-//            maxDis = dbDis;
-//            maxDisIndex = i;
-//        }
-//    }
-//    if(maxDis > eps)
-//    {
-//        return maxDisIndex;
-//    }
-//    return 0;
-//}
 
 bool SearchChargingPileManager::findKeyPointFromLines(PointWithTimeStamp& keyPoint)
 {
@@ -371,9 +403,12 @@ bool SearchChargingPileManager::findKeyPointFromLines(PointWithTimeStamp& keyPoi
                 tempLine.size() - returnValue < _param_ignore_point_num)
             continue;
         //xiwrong-->todo      //Temporary processing--split one line into two lines -- should consider recursion
-        double variance1 = weighted_fit::weightedFit(tempx, tempy, returnValue, &tmpLinePara1);
-        double variance2 = weighted_fit::weightedFit(tempx + returnValue, tempy + returnValue, tempLine.size() - returnValue, &tmpLinePara2);
-
+        //        double variance1 =
+        weighted_fit::weightedFit(tempx, tempy, returnValue, &tmpLinePara1);
+        //        double variance2 =
+        weighted_fit::weightedFit(tempx + returnValue, tempy + returnValue, tempLine.size() - returnValue, &tmpLinePara2);
+        double variance1 = tmpLinePara1.standardDeviation;
+        double variance2 = tmpLinePara2.standardDeviation;
 
         double theta = (tmpLinePara1.Rho - tmpLinePara2.Rho)*180/PAI;
 

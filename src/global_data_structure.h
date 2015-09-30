@@ -3,9 +3,30 @@
 
 #include <ros/ros.h>
 
+namespace weighted_fit {
+typedef struct
+{
+    double x;
+    double y;
+} iPoint;
+
+
+typedef struct{
+    double a;   //y = a*x + b
+    double b;
+    double Rho; // 该段直线的倾角
+    iPoint startPoint;
+    iPoint endPoint;
+    double standardDeviation;
+} LinePara;
+
+
+}
+
+
+
+
 namespace peter_chargingpile_search {
-
-
 struct PointInfo
 {
     double x;

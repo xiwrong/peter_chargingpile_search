@@ -11,10 +11,12 @@
 #include "global_data_structure.h"
 
 
+
 namespace peter_chargingpile_search {
 
 
 class SearchChargingPileFSM;
+
 
 class SearchChargingPileManager
 {
@@ -68,6 +70,9 @@ private:
 
     int  findSalientIndexByVector(std::vector<XYPoint> line, double eps);
 
+    int  recurFindSalientIndexByVector(std::vector<XYPoint> line, double recogAngle, double eps,
+                                       std::vector<weighted_fit::LinePara> lineParas);
+
     bool findKeyPointFromLines(PointWithTimeStamp& keyPoint);
 
 private:
@@ -80,8 +85,7 @@ private:
     ros::Timer     _ctrlCmdVelTimer;
     void onTimerCtrlCmdVel(const ros::TimerEvent& t);
     geometry_msgs::Twist _vel_msg;
-//    boost::mutex _ctrlCmdVelMutex;
-//    bool         _isExistValidObj;
+
 
 private:
     bool _chargeOrderFlag;

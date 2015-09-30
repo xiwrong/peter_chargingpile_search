@@ -13,7 +13,7 @@ CV_IMPLEMENT_QSORT(IntQSort, double, cmp_pts)  // 该宏利用声明并定义函
 
 
 
-double weightedFit(double x[], double y[], int count, LinePara* estLinePara)
+void weightedFit(double x[], double y[], int count, LinePara* estLinePara)
 {
     double wValue[MAX_FITPOINTS_CNT];   // 权值系数
     // 加权最小二乘法
@@ -38,7 +38,7 @@ double weightedFit(double x[], double y[], int count, LinePara* estLinePara)
 
     int i = 0;
     if(wValue == NULL)
-        return -1;
+        return;
     // 迭代20次
     for(i = 0 ; i < 20 ; i++)
     {
@@ -114,7 +114,10 @@ double weightedFit(double x[], double y[], int count, LinePara* estLinePara)
         sum += dDis * dDis;
     }
 
-    return sqrt(sum/count);
+    estLinePara->standardDeviation = sqrt(sum/count);
+
+    //xiwrong-->todo //should delete this return
+//    return sqrt(sum/count);
 
 }
 
