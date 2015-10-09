@@ -29,6 +29,8 @@ void dynConfCb(peterChargingNodeParamsConfig& config, uint32_t level)
     searchChargingManager->_param_max_salient_tolerance      = config.max_salient_tolerance;
     searchChargingManager->_param_max_variance_tolerance     = config.max_variance_tolerance;
     searchChargingManager->_param_max_festureangle_tolerance = config.max_festureangle_tolerance;
+    searchChargingManager->_param_linear_vel                 = config.linear_vel;
+    searchChargingManager->_param_angular_vel                = config.angular_vel;
 
 
 

@@ -30,6 +30,8 @@ public:
     double _param_max_salient_tolerance;
     double _param_max_variance_tolerance;
     double _param_max_festureangle_tolerance;
+    double _param_angular_vel;
+    double _param_linear_vel;
 
 private:
     boost::shared_ptr<SearchChargingPileFSM> _searchFSM;

@@ -21,7 +21,7 @@ const double SearchChargingPileManager::LaserXOffsetToRobot = 0.2;          //un
 
 //dynamic_reconfigure
 const double SearchChargingPileManager::Break_Distance = 0.02;              //unit:m
-const int SearchChargingPileManager::Ignore_Point_Num = 25;              //unit:none
+const int SearchChargingPileManager::Ignore_Point_Num = 25;                 //unit:none
 const double SearchChargingPileManager::Max_Salient_Tolerance = 0.005;      //unit:m
 const double SearchChargingPileManager::Max_FestureAngle_Tolerance = 1.5;   //unit:angle
 const double SearchChargingPileManager::Max_Variance_Tolerance = 0.01;      //unit:Standard Deviation
@@ -31,11 +31,24 @@ const double SearchChargingPileManager::Max_Variance_Tolerance = 0.01;      //un
 SearchChargingPileManager::SearchChargingPileManager(ros::NodeHandle nh) : _nh(nh)
 {
 
+    /*
     _param_break_distance               = _nh.param("peter_break_distance", Break_Distance);
     _param_ignore_point_num             = _nh.param("peter_ignore_point_num", Ignore_Point_Num);
     _param_max_salient_tolerance        = _nh.param("peter_max_salient_tolerance", Max_Salient_Tolerance);
     _param_max_variance_tolerance       = _nh.param("peter_max_variance_tolerance", Max_Variance_Tolerance);
     _param_max_festureangle_tolerance   = _nh.param("peter_max_festureangle_tolerance", Max_FestureAngle_Tolerance);
+*/
+
+    _param_break_distance               = Break_Distance;
+    _param_ignore_point_num             = Ignore_Point_Num;
+    _param_max_salient_tolerance        = Max_Salient_Tolerance;
+    _param_max_variance_tolerance       = Max_Variance_Tolerance;
+    _param_max_festureangle_tolerance   = Max_FestureAngle_Tolerance;
+
+    _param_linear_vel = 0.1;
+    _param_angular_vel = 0.5;
+
+
 
     // xiwrong-->todo temp _chargeOrderFlag
     _chargeOrderFlag = true;
@@ -101,10 +114,10 @@ void SearchChargingPileManager::addLaserScanMsg(const sensor_msgs::LaserScanCons
         _searchFSM->update(packet, transform);
         //        std::cout << transform.getOrigin().x() << " " << transform.getOrigin().y() << std::endl;
 
-        _vel_msg.linear.x  = 0.1 * sqrt(pow(transform.getOrigin().x(), 2.0) + pow(transform.getOrigin().y(), 2.0));
+        _vel_msg.linear.x  = _param_linear_vel* sqrt(pow(transform.getOrigin().x(), 2.0) + pow(transform.getOrigin().y(), 2.0));
         _vel_msg.angular.z = (transform.getOrigin().x() > 0.005)?
                     atan2(transform.getOrigin().y(), transform.getOrigin().x()) :
-                    0.5* transform.getRotation().getAngle();
+                    _param_angular_vel* transform.getRotation().getAngle();
         //        boost::mutex::scoped_lock lock(_ctrlCmdVelMutex);
         //        _isExistValidObj = true;
 
