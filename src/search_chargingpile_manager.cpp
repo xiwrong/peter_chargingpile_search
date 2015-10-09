@@ -47,7 +47,7 @@ SearchChargingPileManager::SearchChargingPileManager(ros::NodeHandle nh) : _nh(n
     _pointsPub = _nh.advertise<sensor_msgs::PointCloud>("debug/cloud", 50);
     _ctrlCmdVelPub = _nh.advertise<geometry_msgs::Twist>("ctrl_cmd_vel", 10);
 
-    ros::Duration period = ros::Duration(1./10);
+    ros::Duration period = ros::Duration(1./20);
     _ctrlCmdVelTimer = _nh.createTimer(period, &SearchChargingPileManager::onTimerCtrlCmdVel, this);
 
 }

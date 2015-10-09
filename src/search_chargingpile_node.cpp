@@ -49,7 +49,7 @@ void rosThreadLoop(int argc, char** argv, ros::NodeHandle& nh)
     //    ros::Subscriber chargeOrderSub = nh.subscribe(nh.resolveName("lsd_slam/keyframes"), 20, frameCb);
 
     //xiwrong-->todo    //resolveName
-    ros::Subscriber laserScanSub = nh.subscribe(nh.resolveName("/peter_laser/scan"), 1000, recvLaserScanCallback);
+    ros::Subscriber laserScanSub = nh.subscribe(nh.resolveName("/scan"), 1000, recvLaserScanCallback);
     //ros::Subscriber laserScanSub = nh.subscribe("sensor_msgs/LaserScan", 1000, recvLaserScan);
 
 
