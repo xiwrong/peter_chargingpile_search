@@ -91,7 +91,7 @@ void SearchChargingPileManager::addLaserScanMsg(const sensor_msgs::LaserScanCons
     PointWithTimeStamp keyPoint;
 
     // ====== method 1 ======
-//    bool flag = findKeyPointFromLines(keyPoint);
+    //    bool flag = findKeyPointFromLines(keyPoint);
     // ====== method 2 ======
     bool flag = recurFindKeyPointFromLines(keyPoint);
 
@@ -116,7 +116,7 @@ void SearchChargingPileManager::addLaserScanMsg(const sensor_msgs::LaserScanCons
 
         _vel_msg.linear.x  = _param_linear_vel* sqrt(pow(transform.getOrigin().x(), 2.0) + pow(transform.getOrigin().y(), 2.0));
         _vel_msg.angular.z = (transform.getOrigin().x() > 0.005)?
-                    atan2(transform.getOrigin().y(), transform.getOrigin().x()) :
+                    _param_angular_vel* atan2(transform.getOrigin().y(), transform.getOrigin().x()) :
                     _param_angular_vel* transform.getRotation().getAngle();
         //        boost::mutex::scoped_lock lock(_ctrlCmdVelMutex);
         //        _isExistValidObj = true;
@@ -394,10 +394,16 @@ bool SearchChargingPileManager::recurFindKeyPointFromLines(PointWithTimeStamp& k
                         keyPoint.y = tmpLinePara1.a* keyPoint.x + tmpLinePara1.b;
                         keyPoint.z = 0;
 
-                        changedAngle1 = (tmpLinePara1.Rho > 0)? tmpLinePara1.Rho: PAI+tmpLinePara1.Rho;
                         changedAngle2 = (tmpLinePara2.Rho > 0)? tmpLinePara2.Rho: PAI+tmpLinePara2.Rho;
+                        changedAngle1 = (tmpLinePara1.Rho < 0 || tmpLinePara2.Rho < 0)? PAI+tmpLinePara1.Rho: tmpLinePara1.Rho;
+//                        changedAngle1 = (tmpLinePara1.Rho > 0)? tmpLinePara1.Rho: PAI+tmpLinePara1.Rho;
+
                         double average = (changedAngle1 + changedAngle2)/2 - PAI/2;
                         keyPoint.theta = average;
+
+                        ROS_INFO_STREAM(" para-r1: " << tmpLinePara1.Rho/PAI*180 <<
+                                        " para-r2: " << tmpLinePara2.Rho/PAI*180 <<
+                                        " average: " << average/PAI*180);
 
                         findResultFlag = true;
                     }
