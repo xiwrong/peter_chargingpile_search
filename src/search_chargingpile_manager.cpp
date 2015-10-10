@@ -115,7 +115,7 @@ void SearchChargingPileManager::addLaserScanMsg(const sensor_msgs::LaserScanCons
         //        std::cout << transform.getOrigin().x() << " " << transform.getOrigin().y() << std::endl;
 
         _vel_msg.linear.x  = _param_linear_vel* sqrt(pow(transform.getOrigin().x(), 2.0) + pow(transform.getOrigin().y(), 2.0));
-        _vel_msg.angular.z = (transform.getOrigin().x() > 0.005)?
+        _vel_msg.angular.z = (transform.getOrigin().x() > 0.05)?
                     _param_angular_vel* atan2(transform.getOrigin().y(), transform.getOrigin().x()) :
                     _param_angular_vel* transform.getRotation().getAngle();
         //        boost::mutex::scoped_lock lock(_ctrlCmdVelMutex);
@@ -401,9 +401,9 @@ bool SearchChargingPileManager::recurFindKeyPointFromLines(PointWithTimeStamp& k
                         double average = (changedAngle1 + changedAngle2)/2 - PAI/2;
                         keyPoint.theta = average;
 
-                        ROS_INFO_STREAM(" para-r1: " << tmpLinePara1.Rho/PAI*180 <<
-                                        " para-r2: " << tmpLinePara2.Rho/PAI*180 <<
-                                        " average: " << average/PAI*180);
+//                        ROS_INFO_STREAM(" para-r1: " << tmpLinePara1.Rho/PAI*180 <<
+//                                        " para-r2: " << tmpLinePara2.Rho/PAI*180 <<
+//                                        " average: " << average/PAI*180);
 
                         findResultFlag = true;
                     }

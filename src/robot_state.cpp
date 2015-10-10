@@ -78,7 +78,7 @@ void ApproachingState::update(UpdateDataPacket& pack, tf::Transform& transform)
 
     ROS_INFO_STREAM("ApproachingState- deltaX Y Theta = " << deltaX << " " << deltaY << " " <<deltaTheta);
 
-    if (deltaX < 0.02 && deltaY < 0.005 && deltaTheta < 0.1)
+    if (deltaX < 0.02 && deltaY < 0.005 /*&& deltaTheta < 0.1*/)
     {
         _fsm->changeState(_fsm->_secondApproachingState);
     }
